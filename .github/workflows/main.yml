@@ -32,10 +32,10 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # The secret you just created
       run: |
         mvn -B verify sonar:sonar \
+        org.sonarsource.scanner.maven:sonar-maven-plugin:5.0.0.4389:sonar \
         -Dsonar.projectKey=YOUR_PROJECT_KEY \
         -Dsonar.organization=YOUR_ORG_NAME \
         -Dsonar.host.url=https://sonarcloud.io
-
     - name: Docker Build (Only if Sonar passes)
       run: |
         docker build -t my-customers-service --build-arg SERVICE_NAME=spring-petclinic-customers-service .
