@@ -33,7 +33,11 @@ services:
      - 8761:8761
 
   customers-service:
-    image: springcommunity/spring-petclinic-customers-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: spring-petclinic-customers-service
     container_name: customers-service
     deploy:
       resources:
@@ -63,7 +67,11 @@ services:
      - 8082:8082
 
   vets-service:
-    image: springcommunity/spring-petclinic-vets-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - SERVICE_NAME=spring-petclinic-vets-service
     container_name: vets-service
     deploy:
       resources:
@@ -76,6 +84,9 @@ services:
         condition: service_healthy
     ports:
      - 8083:8083
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
 
 
   genai-service:
@@ -159,3 +170,19 @@ services:
           memory: 256M
     ports:
     - 9091:9090
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=petclinic
+      - MYSQL_DATABASE=petclinic
+    # STEP 1: Mount the volume to the container's data folder
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+
+volumes:
+  mysql_data:

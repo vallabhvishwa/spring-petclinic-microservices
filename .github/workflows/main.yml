@@ -1,0 +1,41 @@
+name: Java CI/CD with SonarQube
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Important for SonarQube to see code history
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Cache SonarCloud packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+
+    - name: Build and Analyze
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Provided by GitHub
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # The secret you just created
+      run: |
+        mvn -B verify sonar:sonar \
+        -Dsonar.projectKey=YOUR_PROJECT_KEY \
+        -Dsonar.organization=YOUR_ORG_NAME \
+        -Dsonar.host.url=https://sonarcloud.io
+
+    - name: Docker Build (Only if Sonar passes)
+      run: |
+        docker build -t my-customers-service --build-arg SERVICE_NAME=spring-petclinic-customers-service .
